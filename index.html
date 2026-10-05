@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Blood Strike ESP Simulator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #080b10;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+}
+
+/* ARENA */
+#arena {
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+        #0a0e14;
+    background-size: 45px 45px;
+}
+
+/* PAINEL */
+.panel {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    width: 285px;
+    padding: 20px;
+    border: 1px solid #27313d;
+    border-radius: 14px;
+    background: rgba(12,16,22,.95);
+    box-shadow: 0 15px 45px rgba(0,0,0,.5);
+    z-index: 1000;
+}
+
+.title {
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.subtitle {
+    color: #7d8996;
+    font-size: 11px;
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #202731;
+}
+
+.label {
+    font-size: 13px;
+}
+
+/* TOGGLE */
+.switch {
+    width: 48px;
+    height: 25px;
+    border-radius: 20px;
+    background: #303842;
+    padding: 3px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.switch span {
+    display: block;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: #fff;
+    transition: .2s;
+}
+
+.switch.active {
+    background: #18d47b;
+}
+
+.switch.active span {
+    transform: translateX(23px);
+}
+
+.status {
+    margin-top: 18px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    background: #161c23;
+    color: #ff5964;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status.on {
+    color: #18d47b;
+}
+
+/* PLAYER ESP */
+.player {
+    position: absolute;
+    width: 80px;
+    height: 150px;
+    transform: translate(-50%,-50%);
+    display: none;
+    pointer-events: none;
+}
+
+.player.show {
+    display: block;
+}
+
+/* BOX */
+.box {
+    position: absolute;
+    inset: 0;
+    border: 2px solid #18d47b;
+    box-shadow: 0 0 8px rgba(24,212,123,.25);
+}
+
+/* NOME */
+.name {
+    position: absolute;
+    top: -27px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* DISTÂNCIA */
+.distance {
+    position: absolute;
+    bottom: -25px;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    color: #aab5c0;
+}
+
+.legend {
+    margin-top: 15px;
+    color: #697582;
+    font-size: 10px;
+    line-height: 1.5;
+}
+</style>
+</head>
+
+<body>
+
+<div id="arena">
+
+    <!-- PAINEL -->
+    <div class="panel">
+
+        <div class="title">BLOOD STRIKE</div>
+        <div class="subtitle">PRIVATE TEST • ESP SIMULATOR</div>
+
+        <div class="row">
+            <span class="label">ESP</span>
+            <div class="switch" id="espToggle">
+                <span></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <span class="label">Box</span>
+            <div class="switch active" id="boxToggle">
+                <span></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <span class="label">Nome</span>
+            <div class="switch active" id="nameToggle">
+                <span></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <span class="label">Distância</span>
+            <div class="switch active" id="distanceToggle">
+                <span></span>
+            </div>
+        </div>
+
+        <div class="status" id="status">
+            ESP DESATIVADO
+        </div>
+
+        <div class="legend">
+            Protótipo visual para ambiente de testes.
+            Os jogadores exibidos são simulados.
+        </div>
+
+    </div>
+
+    <!-- JOGADORES SIMULADOS -->
+
+    <div class="player" style="left:48%;top:38%" data-distance="42">
+        <div class="box"></div>
+        <div class="name">PLAYER_ALPHA</div>
+        <div class="distance">42m</div>
+    </div>
+
+    <div class="player" style="left:72%;top:32%" data-distance="87">
+        <div class="box"></div>
+        <div class="name">PLAYER_BRAVO</div>
+        <div class="distance">87m</div>
+    </div>
+
+    <div class="player" style="left:62%;top:67%" data-distance="156">
+        <div class="box"></div>
+        <div class="name">PLAYER_CHARLIE</div>
+        <div class="distance">156m</div>
+    </div>
+
+    <div class="player" style="left:28%;top:70%" data-distance="231">
+        <div class="box"></div>
+        <div class="name">PLAYER_DELTA</div>
+        <div class="distance">231m</div>
+    </div>
+
+</div>
+
+<script>
+const state = {
+    esp: false,
+    box: true,
+    name: true,
+    distance: true
+};
+
+const players = document.querySelectorAll(".player");
+
+const espToggle = document.getElementById("espToggle");
+const boxToggle = document.getElementById("boxToggle");
+const nameToggle = document.getElementById("nameToggle");
+const distanceToggle = document.getElementById("distanceToggle");
+
+const status = document.getElementById("status");
+
+function updateSwitch(element, value) {
+    element.classList.toggle("active", value);
+}
+
+function render() {
+
+    updateSwitch(espToggle, state.esp);
+    updateSwitch(boxToggle, state.box);
+    updateSwitch(nameToggle, state.name);
+    updateSwitch(distanceToggle, state.distance);
+
+    status.textContent =
+        state.esp ? "ESP ATIVADO" : "ESP DESATIVADO";
+
+    status.classList.toggle("on", state.esp);
+
+    players.forEach(player => {
+
+        player.classList.toggle(
+            "show",
+            state.esp
+        );
+
+        const box = player.querySelector(".box");
+        const name = player.querySelector(".name");
+        const distance = player.querySelector(".distance");
+
+        box.style.display =
+            state.box ? "block" : "none";
+
+        name.style.display =
+            state.name ? "block" : "none";
+
+        distance.style.display =
+            state.distance ? "block" : "none";
+    });
+}
+
+espToggle.onclick = () => {
+    state.esp = !state.esp;
+    render();
+};
+
+boxToggle.onclick = () => {
+    state.box = !state.box;
+    render();
+};
+
+nameToggle.onclick = () => {
+    state.name = !state.name;
+    render();
+};
+
+distanceToggle.onclick = () => {
+    state.distance = !state.distance;
+    render();
+};
+
+render();
+</script>
+
+</body>
+</html>
